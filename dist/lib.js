@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SurePetcareLockState = exports.SurePetcarePositionWhere = exports.SurePetcareApi = void 0;
+exports.SurePetcareApi = void 0;
 const r = require("request");
 const request = r.defaults({
-    jar: true // use cookies
+    jar: true, // use cookies
     /*, proxy:"http://localhost:8888", strictSSL:false*/
 });
 class SurePetcareApi {
     constructor(config) {
         this.email_address = config.email_address;
         this.password = config.password;
-        this.baseURL = 'https://app.api.surehub.io/api';
+        this.baseURL = "https://app.api.surehub.io/api";
         // interested parties in us being logged in
         this._loginCompleteCallbacks = [];
         this._loggedIn = false;
@@ -32,11 +32,14 @@ class SurePetcareApi {
     }
     _beginLogin() {
         request.post(this.baseURL + "/auth/login", {
+            headers: {
+                "User-Agent": "HomeBridge",
+            },
             json: {
-                "email_address": this.email_address,
-                "password": this.password,
-                "device_id": this.email_address
-            }
+                email_address: this.email_address,
+                password: this.password,
+                device_id: this.email_address,
+            },
         }, (err, response, body) => {
             if (err || response.statusCode === undefined) {
                 console.log("Login failed.");
@@ -66,7 +69,7 @@ class SurePetcareApi {
         this._loginCompleteCallbacks = [];
     }
     getLockStatus(device_id, callback) {
-        this.getStatuses(data => {
+        this.getStatuses((data) => {
             for (const device of data.data.devices) {
                 if (device.id === device_id) {
                     callback(device);
@@ -78,7 +81,7 @@ class SurePetcareApi {
         this._makeAuthenticatedRequest({
             path: "/device/" + device_id + "/control",
             method: "PUT",
-            json: { "locking": lockState }
+            json: { locking: lockState },
         }, function (data) {
             callback(data);
         });
@@ -93,7 +96,7 @@ class SurePetcareApi {
         this.pullingStatuses = true;
         this._makeAuthenticatedRequest({
             path: "/me/start",
-            method: "GET"
+            method: "GET",
         }, (data, err) => {
             const jsonData = JSON.parse(data);
             for (const callback of this.getStatusCallbacks) {
@@ -120,14 +123,15 @@ class SurePetcareApi {
             req.url = this.baseURL + req.path;
         }
         req.auth = { bearer: this.token };
-        req.headers = req.headers || {};
+        req.headers = Object.assign({ "User-Agent": "HomeBridge" }, (req.headers || {}));
         // var self = this;
         request(req, (err, response, body) => {
             if (!err && response.statusCode == 200) {
                 // var json = JSON.parse(body);
                 callback(body);
             }
-            else if (!err && (response.statusCode == 400 || response.statusCode == 401)) {
+            else if (!err &&
+                (response.statusCode == 400 || response.statusCode == 401)) {
                 console.log(body);
                 // // our access token was rejected or expired - time to log in again
                 // // try again when we're logged in
@@ -154,16 +158,3 @@ class SurePetcareApi {
     }
 }
 exports.SurePetcareApi = SurePetcareApi;
-var SurePetcarePositionWhere;
-(function (SurePetcarePositionWhere) {
-    SurePetcarePositionWhere[SurePetcarePositionWhere["Unknown"] = 0] = "Unknown";
-    SurePetcarePositionWhere[SurePetcarePositionWhere["Inside"] = 1] = "Inside";
-    SurePetcarePositionWhere[SurePetcarePositionWhere["Outside"] = 2] = "Outside";
-})(SurePetcarePositionWhere = exports.SurePetcarePositionWhere || (exports.SurePetcarePositionWhere = {}));
-var SurePetcareLockState;
-(function (SurePetcareLockState) {
-    SurePetcareLockState[SurePetcareLockState["Unlocked"] = 0] = "Unlocked";
-    SurePetcareLockState[SurePetcareLockState["LockPetsIn"] = 1] = "LockPetsIn";
-    SurePetcareLockState[SurePetcareLockState["LockPetsOut"] = 2] = "LockPetsOut";
-    SurePetcareLockState[SurePetcareLockState["LockBothWays"] = 3] = "LockBothWays";
-})(SurePetcareLockState = exports.SurePetcareLockState || (exports.SurePetcareLockState = {}));

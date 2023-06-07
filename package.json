@@ -1,6 +1,6 @@
 {
-  "name": "sure_petcare",
-  "version": "0.0.6",
+  "name": "@francoisdebellescize/sure_petcare",
+  "version": "0.0.7",
   "description": "NodeJS API library for Sure Petcare pet door",
   "main": "dist/lib.js",
   "types": "dist/lib.d.ts",
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wylanswets/sure_petcare.git"
+    "url": "git+https://github.com/FrancoisDeBellescize/sure_petcare"
   },
   "author": "Wylan Swets & Jostein Kjønigsen",
   "license": "MIT",
